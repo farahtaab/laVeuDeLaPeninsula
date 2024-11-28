@@ -8,6 +8,29 @@ use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
+     // Obtener todas las noticias
+     public function index()
+     {
+         $news = News::with('category')->get();
+         return response()->json($news);
+     }
+
+    // Mostrar noticias en la página principal (home)
+    public function home()
+    {
+        // Obtener las últimas 14 noticias
+        $news = News::latest()->take(14)->get();
+        return view('home', compact('news'));
+    }
+
+    // Mostrar noticias de una categoría específica
+    public function byCategory($categoryId)
+    {
+        $category = Category::findOrFail($categoryId); // Buscar la categoría
+        $news = $category->news()->latest()->paginate(10); // Obtener noticias relacionadas
+        return view('categories.show', compact('category', 'news'));
+    }
+    
     // Mostrar una noticia individual
     public function show($id)
     {

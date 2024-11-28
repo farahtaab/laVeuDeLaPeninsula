@@ -24,23 +24,23 @@ Route::middleware([
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
 });
 
-// Rutas para noticias
-Route::get('/news', [NewsController::class, 'index']); // Obtener todas las noticias
+// routes/api.php
+
+Route::get('/home', [NewsController::class, 'home'])->name('home'); // Noticias en el home
+
+Route::get('/news', [NewsController::class, 'index']);  // Obtener todas las noticias
 Route::get('/news/{id}', [NewsController::class, 'show'])->name('news.show'); // Vista de una noticia
-Route::get('/news/{id}/edit', [NewsController::class, 'edit'])->name('news.edit'); // Formulario de edición
-Route::put('/news/{id}', [NewsController::class, 'update'])->name('news.update'); // Actualizar noticia
-Route::post('/news', [NewsController::class, 'store']); // Crear noticia
-Route::delete('/news/{id}', [NewsController::class, 'destroy']); // Eliminar noticia
+Route::get('/news/category/{categoryId}', [NewsController::class, 'getByCategory']);  // Obtener noticias por categoría
+Route::post('/news', [NewsController::class, 'store']);  // Crear noticia
+Route::put('/news/{id}', [NewsController::class, 'update']);  // Editar noticia
+Route::delete('/news/{id}', [NewsController::class, 'destroy']);  // Eliminar noticia
 
-// Ruta para noticias por categoría
-Route::get('/news/category/{categoryId}', [NewsController::class, 'byCategory']); // Obtener noticias por categoría
+// Ruta para listar todas las categorías
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+// Ruta para mostrar las noticias de una categoría específica
+Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 
-// Rutas para categorías
-Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index'); // Listar todas las categorías
-Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show'); // Noticias por categoría
-
-// Rutas para comentarios
-Route::get('/news/{newsId}/comments', [CommentController::class, 'getComments']); // Obtener comentarios de una noticia
-Route::post('/news/{newsId}/comments', [CommentController::class, 'store']); // Crear comentario
-Route::put('/comments/{id}', [CommentController::class, 'update']); // Editar comentario
-Route::delete('/comments/{id}', [CommentController::class, 'destroy']); // Eliminar comentario
+Route::get('/news/{newsId}/comments', [CommentController::class, 'getComments']);  // Obtener comentarios de una noticia
+Route::post('/news/{newsId}/comments', [CommentController::class, 'store']);  // Crear comentario
+Route::put('/comments/{id}', [CommentController::class, 'update']);  // Editar comentario
+Route::delete('/comments/{id}', [CommentController::class, 'destroy']);  // Eliminar comentario
