@@ -51,6 +51,13 @@
                 @else
                     <p class="text-gray-500 dark:text-gray-400 mt-4">No hay comentarios en esta noticia.</p>
                 @endif
+
+                {{-- Botón para editar --}}
+                <div class="mt-8">
+                    <a href="{{ route('news.edit', $news->id) }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Editar Noticia
+                    </a>
+                </div>
             </article>
         </div>
     </main>
