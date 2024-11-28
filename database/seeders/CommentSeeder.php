@@ -20,9 +20,9 @@ class CommentSeeder extends Seeder
         // Crear 100 comentarios
         foreach (range(1, 100) as $index) {
             Comment::create([
-                'comment' => $faker->paragraph(2),  // Lorem Ipsum
-                'user_id' => User::inRandomOrder()->first()->id,  // Asignar usuario aleatorio
-                'news_id' => News::inRandomOrder()->first()->id,  // Asignar noticia aleatoria
+                'content' => $faker->paragraph(2),
+                'user_id' => User::inRandomOrder()->first()->id,
+                'news_id' => News::inRandomOrder()->first()->id,
             ]);
         }
     }

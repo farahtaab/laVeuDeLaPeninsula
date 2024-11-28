@@ -11,7 +11,7 @@ class NewsController extends Controller
     // Mostrar una noticia individual
     public function show($id)
     {
-        $news = News::findOrFail($id); // Buscar la noticia
+        $news = News::with(['comments.user'])->findOrFail($id);
         return view('news.show', compact('news'));
     }
 
