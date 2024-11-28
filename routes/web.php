@@ -16,6 +16,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+
     Route::get('/home', function () {
         return view('home');
     })->name('home');
@@ -23,8 +24,6 @@ Route::middleware([
     // Ruta para mostrar todas las categorías
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
 });
-
-// routes/api.php
 
 Route::get('/home', [NewsController::class, 'home'])->name('home'); // Noticias en el home
 
@@ -41,6 +40,10 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
 
 Route::get('/news/{newsId}/comments', [CommentController::class, 'getComments']);  // Obtener comentarios de una noticia
-Route::post('/news/{newsId}/comments', [CommentController::class, 'store']);  // Crear comentario
-Route::put('/comments/{id}', [CommentController::class, 'update']);  // Editar comentario
-Route::delete('/comments/{id}', [CommentController::class, 'destroy']);  // Eliminar comentario
+Route::put('/comments/{id}', action: [CommentController::class, 'update']);  // Editar comentario
+
+// Ruta para crear un comentario en una noticia
+Route::post('/news/{newsId}/comments', [CommentController::class, 'store'])->name('news.comments.store')->middleware('auth:sanctum');
+
+// Eliminar un comentario propio
+Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('auth:sanctum');
