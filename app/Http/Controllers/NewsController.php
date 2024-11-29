@@ -8,6 +8,15 @@ use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
+    public function home()
+{
+    // Obtener las noticias más recientes o las noticias para mostrar en la página de inicio
+    $news = News::latest()->take(5)->get(); // Obtén las últimas 5 noticias, por ejemplo
+
+    // Asegúrate de pasar la variable $news a la vista
+    return view('home', compact('news')); // Pasa $news a la vista 'home'
+}
+
     // Mostrar una noticia individual
     public function show($id)
     {
@@ -54,7 +63,10 @@ class NewsController extends Controller
     public function destroy($id)
     {
         $news = News::findOrFail($id);
+    
+        // Eliminar la noticia
         $news->delete();
-        return response()->json(['message' => 'Noticia eliminada exitosamente']);
+    
+        return redirect()->route('home')->with('success', 'Noticia eliminada correctamente.');
     }
 }

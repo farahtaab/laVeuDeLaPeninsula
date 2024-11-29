@@ -47,6 +47,15 @@
                             <a href="{{ route('news.show', $singleNews->id) }}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
                                 Llegir més →
                             </a>
+
+                            <!-- Formulario de eliminación -->
+                            <form action="{{ route('news.destroy', $singleNews->id) }}" method="POST" class="mt-4">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800">
+                                    Eliminar Notícia
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
