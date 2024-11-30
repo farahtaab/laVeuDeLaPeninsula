@@ -33,32 +33,135 @@
 
                 <h2 class="mt-8 text-2xl font-bold">Comentarios</h2>
                 @if($news->comments->isNotEmpty())
-                    <section class="mt-4 space-y-4">
-                        @foreach($news->comments as $comment)
-                            <article class="p-4 border rounded-lg bg-gray-100 dark:bg-gray-800">
-                                <div class="flex justify-between items-center">
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white">
-                                        {{ $comment->user?->name ?? 'Usuario Anónimo' }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ $comment->created_at->format('d M, Y') }}
-                                    </p>
-                                </div>
-                                <p class="mt-2 text-gray-700 dark:text-gray-300">{{ $comment->content }}</p>
-                            </article>
-                        @endforeach
-                    </section>
+                <section class="mt-4 space-y-4 comment-list">
+                    @foreach($news->comments as $comment)
+                    <article class="p-4 border rounded-lg bg-gray-100 dark:bg-gray-800 comment-item" data-comment-id="{{ $comment->id }}">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                {{ $comment->user?->name ?? 'Usuario Anónimo' }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ $comment->created_at->format('d M, Y') }}
+                            </p>
+                        </div>
+                        <p class="mt-2 text-gray-700 dark:text-gray-300">{{ $comment->content }}</p>
+
+                        @if($comment->user_id === auth()->id())
+                        <button class="delete-comment text-red-600 hover:text-red-800 mt-2" data-comment-id="{{ $comment->id }}">Eliminar</button>
+                        @endif
+                    </article>
+                    @endforeach
+                </section>
                 @else
-                    <p class="text-gray-500 dark:text-gray-400 mt-4">No hay comentarios en esta noticia.</p>
+                <p class="text-gray-500 dark:text-gray-400 mt-4">No hay comentarios en esta noticia.</p>
                 @endif
 
+<<<<<<< HEAD
+                <!-- Formulario para crear comentario -->
+                <form method="POST" action="{{ route('news.comments.store', $news->id) }}" class="mt-6" id="commentForm">
+                    @csrf
+                    <textarea
+                        name="content"
+                        rows="4"
+                        class="block w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-gray-100"
+                        placeholder="Escribe tu comentario aquí..."
+                        required></textarea>
+                    <button
+                        type="submit"
+                        class="mt-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+                        Enviar comentario
+                    </button>
+                </form>
+
+=======
                 {{-- Botón para editar --}}
                 <div class="mt-8">
                     <a href="{{ route('news.edit', $news->id) }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                         Editar Noticia
                     </a>
                 </div>
+>>>>>>> 77964623356826388d6b464b5e4ddf3ac0aeba9c
             </article>
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const commentForm = document.querySelector('#commentForm');
+            const commentList = document.querySelector('.comment-list');
+
+            // Agregar un comentario
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // Evitar la redirección de la página
+
+                const formData = new FormData(commentForm);
+                const newsId = {{ $news->id }}; // ID de la noticia
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Obtener el token CSRF
+
+                // Hacer la petición POST para agregar el comentario
+                fetch(`/news/${newsId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: formData
+                })
+                
+                .then(response => response.json()) // Esperamos respuesta en formato JSON
+                .then(data => {
+                    if (data.comment) {
+                        // Crear un nuevo comentario dinámicamente en el DOM
+                        const newComment = document.createElement('article');
+                        newComment.classList.add('p-4', 'border', 'rounded-lg', 'bg-gray-100', 'dark:bg-gray-800', 'comment-item');
+                        newComment.setAttribute('data-comment-id', data.comment.id);
+                        newComment.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">${data.comment.user.name}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${data.comment.created_at}</p>
+                            </div>
+                            <p class="mt-2 text-gray-700 dark:text-gray-300">${data.comment.content}</p>
+                            <button class="delete-comment text-red-600 hover:text-red-800 mt-2" data-comment-id="${data.comment.id}">Eliminar</button>
+                        `;
+                        // Insertar el nuevo comentario en el DOM
+                        commentList.prepend(newComment);
+                        commentForm.reset(); // Limpiar el formulario de comentario
+                    } else {
+                        console.error('Error al crear el comentario');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+
+            // Eliminar un comentario
+            commentList.addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('delete-comment')) {
+                    const commentId = e.target.getAttribute('data-comment-id');
+                    const newsId = {{ $news->id }}; // ID de la noticia
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content'); // Obtener el token CSRF
+
+                    fetch(`/news/${newsId}/comments/${commentId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': token
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Comentario eliminado con éxito.') {
+                            // Eliminar el comentario del DOM
+                            const commentElement = e.target.closest('.comment-item');
+                            commentElement.remove();
+                        } else {
+                            console.error('Error al eliminar el comentario');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        });
+    </script>
 </x-app-layout>
