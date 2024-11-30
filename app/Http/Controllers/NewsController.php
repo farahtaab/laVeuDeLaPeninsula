@@ -5,44 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\News;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
 
 class NewsController extends Controller
 {
-<<<<<<< HEAD
-     // Obtener todas las noticias
-     public function index()
-     {
-         $news = News::with('category')->get();
-         return response()->json($news);
-     }
-
-    // Mostrar noticias en la página principal (home)
-    public function home()
-    {
-        // Obtener las últimas 14 noticias
-        $news = News::latest()->take(14)->get();
-        return view('home', compact('news'));
-    }
-
-    // Mostrar noticias de una categoría específica
-    public function byCategory($categoryId)
-    {
-        $category = Category::findOrFail($categoryId); // Buscar la categoría
-        $news = $category->news()->latest()->paginate(10); // Obtener noticias relacionadas
-        return view('categories.show', compact('category', 'news'));
-    }
-    
-=======
     public function home()
 {
     // Obtener las noticias más recientes o las noticias para mostrar en la página de inicio
-    $news = News::latest()->take(5)->get(); // Obtén las últimas 5 noticias, por ejemplo
+    $news = News::latest()->take(10)->get(); // Obtén las últimas 5 noticias, por ejemplo
 
     // Asegúrate de pasar la variable $news a la vista
     return view('home', compact('news')); // Pasa $news a la vista 'home'
 }
 
->>>>>>> df0ff5571bd50e0f9da3c0631f98ff76bec9529b
     // Mostrar una noticia individual
     public function show($id)
     {
@@ -95,4 +70,33 @@ class NewsController extends Controller
     
         return redirect()->route('home')->with('success', 'Noticia eliminada correctamente.');
     }
+
+    public function create()
+    {
+        $categories = Category::all(); // Obtener todas las categorías para el formulario
+        return view('news.create', compact('categories')); // Asegurarse de que 'news.create' exista
+    }
+    
+    public function store(Request $request)
+{
+    // Validación de los datos
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'content' => 'required|string',
+        'category_id' => 'required|exists:categories,id',
+        'image_url' => 'nullable|url',
+    ]);
+
+    // Crear una nueva noticia
+    News::create([
+        'title' => $request->input('title'),
+        'content' => $request->input('content'),
+        'category_id' => $request->input('category_id'),
+        'image_url' => $request->input('image_url'),
+        'user_id' => Auth::id(), // Asociar al usuario autenticado
+    ]);
+
+    return redirect()->route('home')->with('success', 'Noticia creada correctamente.');
+}
+
 }

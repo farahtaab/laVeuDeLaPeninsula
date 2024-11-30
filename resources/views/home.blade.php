@@ -1,4 +1,16 @@
 <x-app-layout>
+    <!-- Botón "Crear Noticia" en la parte superior, visible solo para usuarios autenticados -->
+    @auth
+    <div class="bg-gray-100 dark:bg-gray-800 py-4">
+        <div class="px-4 mx-auto max-w-screen-xl flex justify-end">
+            <a href="{{ route('news.create') }}" 
+                class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800">
+                + Crear Notícia
+            </a>
+        </div>
+    </div>
+    @endauth
+
     <!-- Sección inicial -->
     <section class="bg-white dark:bg-gray-900">
         <div class="gap-16 items-center py-12 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6">
@@ -31,12 +43,11 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 masonry">
                 @foreach ($news as $index => $singleNews)
-                    <!-- Variar el tamaño dependiendo del índice -->
                     <div class="@if ($index % 7 === 0) col-span-2 @endif bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:scale-105 transition-transform duration-300">
-                        <img class="w-full @if ($index % 7 === 0) h-60 @elseif ($index % 4 === 0) h-48 @else h-40 @endif object-cover lazyload" src="{{ $singleNews->image_url }}" alt="{{ $singleNews->title }}">
+                        <img class="w-full @if ($index % 7 === 0) h-60 @elseif ($index % 4 === 0) h-48 @else h-40 @endif object-cover" src="{{ $singleNews->image_url }}" alt="{{ $singleNews->title }}">
                         <div class="p-4">
                             <span class="inline-block @if ($index % 7 === 0) bg-blue-600 @elseif ($index % 4 === 0) bg-green-600 @else bg-yellow-600 @endif text-white text-xs font-semibold px-2 py-1 rounded mb-2">
-                                {{ $singleNews->category->name }} 📅
+                                {{ $singleNews->category->name ?? 'Sense Categoria' }}
                             </span>
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
                                 {{ $singleNews->title }}
@@ -48,14 +59,16 @@
                                 Llegir més →
                             </a>
 
-                            <!-- Formulario de eliminación -->
-                            <form action="{{ route('news.destroy', $singleNews->id) }}" method="POST" class="mt-4">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800">
-                                    Eliminar Notícia
-                                </button>
-                            </form>
+                            <!-- Formulario de eliminación solo si el usuario autenticado es el autor -->
+                            @if ($singleNews->user_id === auth()->id())
+                                <form action="{{ route('news.destroy', $singleNews->id) }}" method="POST" class="mt-4">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-800">
+                                        Eliminar Notícia
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -99,32 +112,5 @@
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             grid-gap: 16px;
         }
-
-        .lazyload {
-            opacity: 0;
-            transition: opacity 0.3s ease-in;
-        }
-
-        .lazyload[data-loaded] {
-            opacity: 1;
-        }
     </style>
-
-    <script>
-        // Script para Lazy Loading
-        document.addEventListener("DOMContentLoaded", function () {
-            const lazyImages = document.querySelectorAll("img.lazyload");
-            lazyImages.forEach(img => {
-                const observer = new IntersectionObserver(entries => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            img.src = img.dataset.src || img.src;
-                            img.setAttribute("data-loaded", true);
-                        }
-                    });
-                });
-                observer.observe(img);
-            });
-        });
-    </script>
 </x-app-layout>
