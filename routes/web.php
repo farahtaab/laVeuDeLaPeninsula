@@ -23,8 +23,6 @@ Route::middleware([
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 });
 
-Route::get('/home', [NewsController::class, 'home'])->name('home'); // Noticias en el home
-
 // Ruta para mostrar el formulario de creación de noticias (asegurarse de que esté dentro del middleware de autenticación)
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
@@ -41,14 +39,6 @@ Route::delete('/news/{id}', [NewsController::class, 'destroy'])->name('news.dest
 // Ruta para listar todas las categorías
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
-Route::get('/news/{newsId}/comments', [CommentController::class, 'getComments']);  // Obtener comentarios de una noticia
-Route::put('/comments/{id}', action: [CommentController::class, 'update']);  // Editar comentario
-
-// Ruta para crear un comentario en una noticia
-Route::post('/news/{newsId}/comments', [CommentController::class, 'store'])->name('news.comments.store')->middleware('auth:sanctum');
-
-// Eliminar un comentario propio
-Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('auth:sanctum');
 // Ruta para listar noticias de una categoría específica
 Route::get('/categories/{id}', [CategoryController::class, 'news'])->name('categories.news');
 
