@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
+
+    public function create()
+{
+    dd('Formulario de creación de noticias'); // Debug para ver si llega al controlador
+    return view('news.create');
+}
     // Obtener todas las noticias
     public function index()
     {
@@ -39,18 +45,27 @@ class NewsController extends Controller
     }
 
     // Crear una nueva noticia
+    // Almacena la nueva noticia
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'user_id' => 'required|exists:users,id',
-            'image_url' => 'required|url'
+        // Valida los datos del formulario
+        $validated = $request->validate([
+            'title' => 'required|max:255',
+            'content' => 'required',
+            'image_url' => 'required|url',
+            'category_id' => 'required|exists:categories,id', // Asegúrate de que el id de categoría sea válido
         ]);
 
-        $news = News::create($request->all());
-        return response()->json($news, 201);
+        // Crea y guarda la noticia
+        News::create([
+            'title' => $validated['title'],
+            'content' => $validated['content'],
+            'image_url' => $validated['image_url'],
+            'category_id' => $validated['category_id'],
+        ]);
+
+        // Redirige a la página principal de noticias o alguna otra
+        return redirect()->route('news.create')->with('success', 'Notícia creada correctament!');
     }
 
     // Editar una noticia existente

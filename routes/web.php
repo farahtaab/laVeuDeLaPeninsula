@@ -44,3 +44,6 @@ Route::get('/news/{newsId}/comments', [CommentController::class, 'getComments'])
 Route::post('/news/{newsId}/comments', [CommentController::class, 'store']);  // Crear comentario
 Route::put('/comments/{id}', [CommentController::class, 'update']);  // Editar comentario
 Route::delete('/comments/{id}', [CommentController::class, 'destroy']);  // Eliminar comentario
+
+Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
+Route::post('/news', [NewsController::class, 'store'])->name('news.store');
