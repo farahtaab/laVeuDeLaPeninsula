@@ -1,6 +1,7 @@
 <x-app-layout>
     <main class="py-12">
         <div class="max-w-4xl mx-auto px-4">
+            
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Crear Notícia</h1>
 
             @if ($errors->any())
@@ -28,7 +29,7 @@
                               class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('content') }}</textarea>
                 </div>
 
-                <div>
+                <div> 
                     <label for="image_url" class="block text-sm font-medium text-gray-700 dark:text-gray-400">URL de Imagen</label>
                     <input type="url" id="image_url" name="image_url" value="{{ old('image_url') }}" 
                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
