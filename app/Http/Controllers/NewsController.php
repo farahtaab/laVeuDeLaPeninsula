@@ -5,83 +5,98 @@ namespace App\Http\Controllers;
 use App\Models\News;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
 
 class NewsController extends Controller
 {
-
-    public function create()
-{
-    dd('Formulario de creación de noticias'); // Debug para ver si llega al controlador
-    return view('news.create');
-}
-    // Obtener todas las noticias
-    public function index()
-    {
-        $news = News::with('category')->get();
-        return response()->json($news);
-    }
-
-    // Mostrar noticias en la página principal (home)
     public function home()
-    {
-        // Obtener las últimas 14 noticias
-        $news = News::latest()->take(14)->get();
-        return view('home', compact('news'));
-    }
+{
+    // Obtener las noticias más recientes o las noticias para mostrar en la página de inicio
+    $news = News::latest()->take(10)->get(); // Obtén las últimas 5 noticias, por ejemplo
 
-    // Mostrar noticias de una categoría específica
-    public function byCategory($categoryId)
-    {
-        $category = Category::findOrFail($categoryId); // Buscar la categoría
-        $news = $category->news()->latest()->paginate(10); // Obtener noticias relacionadas
-        return view('categories.show', compact('category', 'news'));
-    }
+    // Asegúrate de pasar la variable $news a la vista
+    return view('home', compact('news')); // Pasa $news a la vista 'home'
+}
 
     // Mostrar una noticia individual
     public function show($id)
     {
-        $news = News::findOrFail($id); // Buscar la noticia
+        $news = News::with(['comments.user'])->findOrFail($id);
         return view('news.show', compact('news'));
     }
 
-    // Crear una nueva noticia
-    // Almacena la nueva noticia
-    public function store(Request $request)
-    {
-        // Valida los datos del formulario
-        $validated = $request->validate([
-            'title' => 'required|max:255',
-            'content' => 'required',
-            'image_url' => 'required|url',
-            'category_id' => 'required|exists:categories,id', // Asegúrate de que el id de categoría sea válido
-        ]);
-
-        // Crea y guarda la noticia
-        News::create([
-            'title' => $validated['title'],
-            'content' => $validated['content'],
-            'image_url' => $validated['image_url'],
-            'category_id' => $validated['category_id'],
-        ]);
-
-        // Redirige a la página principal de noticias o alguna otra
-        return redirect()->route('news.create')->with('success', 'Notícia creada correctament!');
-    }
-
     // Editar una noticia existente
-    public function update(Request $request, $id)
+    public function edit($id)
     {
+        // Encuentra la noticia por su ID
         $news = News::findOrFail($id);
 
-        $news->update($request->all());
-        return response()->json($news);
+        // Obtén todas las categorías para mostrar en el formulario
+        $categories = Category::all();
+
+        // Muestra la vista de edición con los datos de la noticia y categorías
+        return view('news.edit', compact('news', 'categories'));
     }
+
+    // Actualizar una noticia
+    public function update(Request $request, $id)
+    {
+        // Buscar la noticia por su ID
+        $news = News::findOrFail($id);
+    
+        // Validación de los datos recibidos
+        $request->validate([
+            'title' => 'required|string',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image_url' => 'nullable|url', // Solo si la imagen es opcional
+        ]);
+    
+        // Actualizar la noticia
+        $news->update($request->all());
+    
+        // Redirigir a la vista de la noticia con los cambios realizados
+        return redirect()->route('news.show', $news->id);
+    }
+    
 
     // Eliminar una noticia
     public function destroy($id)
     {
         $news = News::findOrFail($id);
+    
+        // Eliminar la noticia
         $news->delete();
-        return response()->json(['message' => 'News deleted successfully']);
+    
+        return redirect()->route('home')->with('success', 'Noticia eliminada correctamente.');
     }
+
+    public function create()
+    {
+        $categories = Category::all(); // Obtener todas las categorías para el formulario
+        return view('news.create', compact('categories')); // Asegurarse de que 'news.create' exista
+    }
+    
+    public function store(Request $request)
+{
+    // Validación de los datos
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'content' => 'required|string',
+        'category_id' => 'required|exists:categories,id',
+        'image_url' => 'nullable|url',
+    ]);
+
+    // Crear una nueva noticia
+    News::create([
+        'title' => $request->input('title'),
+        'content' => $request->input('content'),
+        'category_id' => $request->input('category_id'),
+        'image_url' => $request->input('image_url'),
+        'user_id' => Auth::id(), // Asociar al usuario autenticado
+    ]);
+
+    return redirect()->route('home')->with('success', 'Noticia creada correctamente.');
+}
+
 }
