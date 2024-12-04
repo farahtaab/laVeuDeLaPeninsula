@@ -40,12 +40,13 @@
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @foreach (App\Models\Category::all() as $category)
-                    <x-nav-link href="{{ route('categories.show', ['id' => $category->id]) }}"
-                        :active="request()->routeIs('categories.show') && request()->route('id') == $category->id">
+                    <x-nav-link href="{{ route('categories.news', ['id' => $category->id]) }}"
+                        :active="request()->routeIs('categories.news') && request()->route('id') == $category->id">
                         {{ $category->name }}
                     </x-nav-link>
                     @endforeach
                 </div>
+
 
 
             </div>

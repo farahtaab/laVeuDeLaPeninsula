@@ -42,34 +42,26 @@ class CommentController extends Controller
             'user_id' => Auth::id(), // El usuario autenticado
         ]);
 
-        // Responder con el comentario creado
-        return response()->json([
-            'message' => 'Comentario creado con éxito.',
-            'comment' => $comment->load('user:id,name'), // Incluir el nombre del usuario
-        ], 201);
+        // Redirigir a la página de la noticia con un mensaje de éxito
+    return redirect()->route('news.show', ['id' => $newsId])
+    ->with('success', 'Comentario creado con éxito.');
     }
 
 
-    /**
-     * Eliminar un comentario propio.
-     */
-    public function destroy($id)
-    {
-        // Buscar el comentario
-        $comment = Comment::findOrFail($id);
+    public function destroy(Request $request, $id)
+{
+    $comment = Comment::findOrFail($id);
 
-        // Verificar que el usuario autenticado es el dueño del comentario
-        if ($comment->user_id !== Auth::id()) {
-            return response()->json([
-                'message' => 'No tienes permiso para eliminar este comentario.',
-            ], 403);
-        }
-
-        // Eliminar el comentario
-        $comment->delete();
-
-        return response()->json([
-            'message' => 'Comentario eliminado con éxito.',
-        ]);
+    if ($comment->user_id !== auth()->id()) {
+        return redirect()->back()->with('error', 'No tienes permiso para eliminar este comentario.');
     }
+
+    $comment->delete();
+
+    // Redirige a la página anterior si no es una solicitud JSON
+    return redirect()->route('news.show', ['id' => $comment->news_id])
+        ->with('success', 'Comentario eliminado con éxito.');
+}
+
+    
 }

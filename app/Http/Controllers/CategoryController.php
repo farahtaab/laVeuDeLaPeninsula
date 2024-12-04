@@ -14,12 +14,12 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
 
-    public function show($id)
+    public function news($id)
     {
-        $category = Category::findOrFail($id);
-        $news = $category->news()->latest()->paginate(10);
-
-        return view('categories.show', compact('category', 'news'));
-    }
+        $category = Category::findOrFail($id); // Encuentra la categoría o lanza error 404.
+        $news = $category->news()->latest()->paginate(10); // Obtén las noticias paginadas.
+    
+        return view('categories.index', compact('category', 'news')); // Usa 'index' para mostrar las noticias.
+    }    
 
 }
